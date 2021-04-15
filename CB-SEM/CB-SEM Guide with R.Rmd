@@ -1,5 +1,5 @@
 ---
-title: "CB-SEM Guide with R"
+title: "CB-SEM Guide using R"
 author: "Christopher Llones"
 date: " Last edited: `r format(Sys.time(), '%d %B %Y')`"
 output:
