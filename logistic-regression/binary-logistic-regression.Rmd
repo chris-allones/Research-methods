@@ -1,0 +1,95 @@
+---
+title: "Binary logistic regression"
+date: " Last edited: `r format(Sys.time(), '%d %B %Y')`"
+output:
+  html_document:
+    theme: cosmo
+    toc: true
+    number_sections: true
+    code_folding: hide
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment = " ", collapse = FALSE,
+                      message=FALSE, warning=FALSE)
+
+# Libraries
+library(tidyverse)
+library(janitor)
+library(wooldridge)
+library(gujarati)
+
+```
+
+
+# Ojective of logistic regression
+
+Logistic regression is a multiple regression but with an outcome variable that is categorical variable and predictor variables that are continuos or categorical. It a technique with the purpose of classifying objects into distinct groups based on the characteristics. The ultimate goal of prediction is not a specific metric value, like in multiple regression, but instead a method of placing each observation into a distinct category or group.
+
+
+The standard logistic regression function for predicting the outcome of an observatino given a predictor is an s-shaped curve defined as:
+
+$$ p  = \frac{\exp(y)}{1 + \exp(y)}$$
+
+wherein:
+
+- $y = b_0 + b_1x$
+- $\exp()$ is the exponential
+- $p$ is the probability of event to occur (1) given $x$
+
+```{r}
+crime <- 
+crime1 %>% filter(narr86 < 2) %>% tibble()
+
+glm(narr86 ~ pcnv + avgsen + tottime + ptime86 + qemp86, 
+    data = crime, family = binomial(link = "logit")) %>% 
+     summary()
+
+lm(narr86 ~ pcnv + avgsen + tottime + ptime86 + qemp86, 
+    data = crime) %>% 
+     summary()
+```
+
+
+
+
+# Assumptions of logistic regression
+
+
+
+# Estimation and assessing overall fit
+
+### Loading the required packages {-}
+
+```
+
+library(tidyverse)
+library(wooldridge)
+
+```
+
+### Simple logistic regression {-}
+
+```{r}
+grade_data <- gujarati::Table15_7 %>% 
+     clean_names() %>% 
+     tibble() %>% 
+     mutate(across(obs:grade, ~as.character(.x))) %>% 
+     mutate(across(obs:grade, ~as.numeric(.x)))
+     
+
+model <- glm(grade ~ tuce, data = grade_data, family = binomial(link = "logit"))
+summary(model)
+```
+
+
+```{r}
+equatiomatic::extract_eq(model)
+```
+
+
+# Interpretation of results
+
+
+
