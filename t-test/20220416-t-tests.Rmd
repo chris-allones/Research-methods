@@ -57,9 +57,9 @@ The independent *t* test is used for testing the difference between means of two
 
 # Assumptions
 
-+ Independence - the two groups are independent of one another.
++ Independence - each sample has been randomly selected from the population it represents.
 
-+ Normality - the dependent variable is normally distributed.
++ Normality - the distribution of data in the underlying population from which each of hte samples is derived is normal.
 
 + Homogeneity of variance - the distribution of the dependent variable for one of the groups being compared has the same variance as the distribution for the other group being compared.
 
@@ -112,6 +112,8 @@ The confidence interval information shows that the null hypothesis value (i.e., 
 ind_ttest <- 
 t.test(words ~ gender, data = memory_ability, alternative = "two.sided")
 
+ind_ttest
+
 ```
 
 We can also compute for the eta-square ($\eta^2$) which can be interpreted in exactly the same as $R^2$ in correlation and regression. That is, approximately 33.63% of the variability in the number of words correctly recalled was explained by the gender manipulation. Eta-square can be calculated by:
@@ -121,6 +123,65 @@ $$\eta^2 = \frac{t^2}{t^2 + df}$$
 ```{r}
 ind_ttest$statistic^2 / (ind_ttest$statistic^2 + ind_ttest$parameter)
 ```
+
+
+# Manual computation
+
+The t statistic for the t test for independent sample is given by:
+
+$$
+t = \frac{\bar{X_1} - \bar{X_2}}{\sqrt{\frac{s_1^2}{n_1} + \frac{s_2^2}{n_1}}}
+$$
+where $\bar{X}$ is the mean value for each group, $S^2$ is the sample variance, and $n$ number of observation in each group.
+
+```{r}
+# X1 - mean words recalled by male
+mean_male <- 
+memory_ability %>% filter(gender == "Male") %>% summarise(m_words = mean(words)) %>% pull()
+
+# X2 - mean words recalled by female
+mean_female <- 
+memory_ability %>% filter(gender == "Female") %>% summarise(m_words = mean(words)) %>% pull()
+
+# s1 - variance of words recalled by male
+variance_male <- 
+memory_ability %>% filter(gender == "Male") %>% summarise(m_words = var(words)) %>% pull()
+
+# s2 - variance of words recalled by female
+variance_female <- 
+memory_ability %>% filter(gender == "Female") %>% summarise(m_words = var(words)) %>% pull()
+
+# no of male
+n_male <- 
+memory_ability %>% filter(gender == "Male") %>% count() %>% pull()
+
+# no of female
+n_female <- 
+memory_ability %>% filter(gender == "Female") %>% count() %>% pull()
+```
+
+```{r}
+# Computing the t statistic
+t_stat <- 
+(mean_male - mean_female) / sqrt((variance_male/n_male) + (variance_female/ n_female))
+
+t_stat
+
+# Deriving the two-tailed p-value
+pt(q = t_stat, df = 18) * 2
+```
+
+
+<br>
+
+***
+
+### References {-}
+
+Ho, Robert (2014).Handbook of Univariate and Multivariate Data Analysis with IBM SPSS (2nd edition). Chapman & Hall/CRC, Taylor & Francis Group.
+
+Sheskin, David J. (2011). Handbook of Parametric and Nonparametric Statistical Procedures (5th edition). Chapman & Hall/CRC, Taylor & Francis Group.
+
 
 
 

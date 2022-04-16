@@ -196,6 +196,10 @@ pre code {
 <li><a href="#homogeneity-of-variance"><span class="toc-section-number">4.3</span> Homogeneity of variance</a></li>
 </ul></li>
 <li><a href="#results-and-interpretation"><span class="toc-section-number">5</span> Results and interpretation</a></li>
+<li><a href="#manual-computation"><span class="toc-section-number">6</span> Manual computation</a>
+<ul>
+<li><a href="#references">References</a></li>
+</ul></li>
 </ul>
 </div>
 
@@ -207,8 +211,8 @@ pre code {
 <div id="assumptions" class="section level1" number="2">
 <h1><span class="header-section-number">2</span> Assumptions</h1>
 <ul>
-<li><p>Independence - the two groups are independent of one another.</p></li>
-<li><p>Normality - the dependent variable is normally distributed.</p></li>
+<li><p>Independence - each sample has been randomly selected from the population it represents.</p></li>
+<li><p>Normality - the distribution of data in the underlying population from which each of hte samples is derived is normal.</p></li>
 <li><p>Homogeneity of variance - the distribution of the dependent variable for one of the groups being compared has the same variance as the distribution for the other group being compared.</p></li>
 </ul>
 </div>
@@ -278,12 +282,71 @@ group  1  0.0869 0.7715
 <p>The result from the <em>t</em> test indicate that there is a significant differenc between the male and female samples in the number of words correctly recalled, <em>t(df=18)=-3.02, p&lt;0.01</em>. The mean values indicate that females correctly recalled significantly more words (M=22.10) than males(M=17.70).</p>
 <p>The confidence interval information shows that the null hypothesis value (i.e., zero) does not fall within the interval. Therefore the null hypothesis of equality of means can be rejected.</p>
 <pre class="r"><code>ind_ttest &lt;- 
-t.test(words ~ gender, data = memory_ability, alternative = &quot;two.sided&quot;)</code></pre>
+t.test(words ~ gender, data = memory_ability, alternative = &quot;two.sided&quot;)
+
+ind_ttest</code></pre>
+<pre><code>
+    Welch Two Sample t-test
+
+data:  words by gender
+t = -3.0203, df = 17.958, p-value = 0.007367
+alternative hypothesis: true difference in means between group Male and group Female is not equal to 0
+95 percent confidence interval:
+ -7.461101 -1.338899
+sample estimates:
+  mean in group Male mean in group Female 
+                17.7                 22.1 </code></pre>
 <p>We can also compute for the eta-square (<span class="math inline">\(\eta^2\)</span>) which can be interpreted in exactly the same as <span class="math inline">\(R^2\)</span> in correlation and regression. That is, approximately 33.63% of the variability in the number of words correctly recalled was explained by the gender manipulation. Eta-square can be calculated by:</p>
 <p><span class="math display">\[\eta^2 = \frac{t^2}{t^2 + df}\]</span></p>
 <pre class="r"><code>ind_ttest$statistic^2 / (ind_ttest$statistic^2 + ind_ttest$parameter)</code></pre>
 <pre><code>        t 
 0.3368622 </code></pre>
+</div>
+<div id="manual-computation" class="section level1" number="6">
+<h1><span class="header-section-number">6</span> Manual computation</h1>
+<p>The t statistic for the t test for independent sample is given by:</p>
+<p><span class="math display">\[
+t = \frac{\bar{X_1} - \bar{X_2}}{\sqrt{\frac{s_1^2}{n_1} + \frac{s_2^2}{n_1}}}
+\]</span> where <span class="math inline">\(\bar{X}\)</span> is the mean value for each group, <span class="math inline">\(S^2\)</span> is the sample variance, and <span class="math inline">\(n\)</span> number of observation in each group.</p>
+<pre class="r"><code># X1 - mean words recalled by male
+mean_male &lt;- 
+memory_ability %&gt;% filter(gender == &quot;Male&quot;) %&gt;% summarise(m_words = mean(words)) %&gt;% pull()
+
+# X2 - mean words recalled by female
+mean_female &lt;- 
+memory_ability %&gt;% filter(gender == &quot;Female&quot;) %&gt;% summarise(m_words = mean(words)) %&gt;% pull()
+
+# s1 - variance of words recalled by male
+variance_male &lt;- 
+memory_ability %&gt;% filter(gender == &quot;Male&quot;) %&gt;% summarise(m_words = var(words)) %&gt;% pull()
+
+# s2 - variance of words recalled by female
+variance_female &lt;- 
+memory_ability %&gt;% filter(gender == &quot;Female&quot;) %&gt;% summarise(m_words = var(words)) %&gt;% pull()
+
+# no of male
+n_male &lt;- 
+memory_ability %&gt;% filter(gender == &quot;Male&quot;) %&gt;% count() %&gt;% pull()
+
+# no of female
+n_female &lt;- 
+memory_ability %&gt;% filter(gender == &quot;Female&quot;) %&gt;% count() %&gt;% pull()</code></pre>
+<pre class="r"><code># Computing the t statistic
+t_stat &lt;- 
+(mean_male - mean_female) / sqrt((variance_male/n_male) + (variance_female/ n_female))
+
+t_stat</code></pre>
+<pre><code>[1] -3.02035</code></pre>
+<pre class="r"><code># Deriving the two-tailed p-value
+pt(q = t_stat, df = 18) * 2</code></pre>
+<pre><code>[1] 0.007352521</code></pre>
+<p><br></p>
+<hr />
+<div id="references" class="section level3 unnumbered">
+<h3 class="unnumbered">References</h3>
+<p>Ho, Robert (2014).Handbook of Univariate and Multivariate Data Analysis with IBM SPSS (2nd edition). Chapman &amp; Hall/CRC, Taylor &amp; Francis Group.</p>
+<p>Sheskin, David J. (2011). Handbook of Parametric and Nonparametric Statistical Procedures (5th edition). Chapman &amp; Hall/CRC, Taylor &amp; Francis Group.</p>
+</div>
 </div>
 
 
